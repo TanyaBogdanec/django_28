@@ -1,4 +1,5 @@
 from django.db import models
+from django import forms
 
 
 class User(models.Model):
@@ -13,7 +14,6 @@ class User(models.Model):
 class Task(models.Model):
 
     STATUS_CHOICES = [
-        ("Pending", "Pending"),
         ("In progress", "In progress"),
         ("Completed", "Completed")
     ]
@@ -28,3 +28,10 @@ class Task(models.Model):
 
     def __str__(self):
         return self.name_task
+
+
+class Comment(models.Model):
+    task_comment = models.ForeignKey(Task, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_date = models.DateTimeField(auto_now_add=True)
