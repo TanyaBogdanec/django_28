@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Task, Comment
+from .models import Task, User, Comment
 from .forms import TaskForm, CommentForm
 
 
@@ -106,20 +106,50 @@ def add_comment_to_task(request, pk):
 # назначать исполнителей, изменять статус выполнения и оставлять комментарии.
 
 @login_required
-def create_task(request):
-    pass
+def create_task_post(request):
+    if request.method == ('POST'):
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            return render(request, 'task_created.html')
+    else:
+        form = TaskForm()
+        return render(request, 'create_task.html', form)
 
 @login_required
-def assign_executor(request):
-    pass
+def assign_executor(request, task_id):
+    task = Task.objects.get(pk=task_id)
+
+    if request.method == 'POST':
+        executor_id = request.POST.get('executor_id')
+        executor = User.objects.get(pk=executor_id)
+        return render(request, 'assigned_executor.html', task, executor)
+    else:
+        users = User.objects.all()
+        return render(request, 'assign_executor.html', task, users)
+
 
 @login_required
-def update_task_status(request):
-    pass
+def update_status(request, task_id):
+    task = Task.objects.get(pk=task_id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('new_status')
+        task.status = new_status
+        task.save()
+        return render(request, 'updated_task_status.html', task, new_status)
+    else:
+        return render(request, 'update_task_status.html', task)
 
 @login_required
-def add_comment_to_task(request):
-    pass
+def add_comment_task(request, task_id):
+    task = Task.objects.get(pk=task_id)
 
-# не до конца поняла, что нужно писать в этих функция, чтобы правильно работало.
-# и как зарегестрирорвать их в urls, чтобы работало
+    if request.method == 'POST':
+        comment_text = request.POST.get('comment_text')
+        new_comment = Comment(text=comment_text, task=task)
+        new_comment.save()
+        return redirect('task_detail', task_id=task.id)
+    else:
+        return render(request, 'add_comment_to_task.html', task)
+
+
