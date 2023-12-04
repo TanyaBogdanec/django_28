@@ -14,6 +14,6 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ("name", "email")
 
 
-admin.site.register(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(Comment)
 admin.site.register(Task, TaskAdmin)
